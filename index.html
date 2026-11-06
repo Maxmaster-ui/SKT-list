@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>SKT 견학 인원 체크</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<style>
+/* Layout: roll-call clipboard — sticky checkpoint rail, tally card, one tappable row per trainee */
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --ink:#16213A; --muted:#5B6478; --line:#DDE2EA;
+  --accent:#D7263D; --accent-soft:#FBE7EA; --navy:#1E3A6E; --navy-soft:#E6ECF7;
+  --ok:#1E7A4F; --ok-soft:#E2F3EA; --warn:#A15C00; --warn-soft:#FDF1DC; --off:#8A93A6;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace; --r:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1522; --surface:#172033; --ink:#E8ECF4; --muted:#9AA4B8; --line:#2A354B;
+  --accent:#FF5A6E; --accent-soft:#3A1D25; --navy:#9DB8EE; --navy-soft:#1D2A44;
+  --ok:#5FD39A; --ok-soft:#173A2A; --warn:#F2B35B; --warn-soft:#3A2C14; --off:#6B7489; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1522; --surface:#172033; --ink:#E8ECF4; --muted:#9AA4B8; --line:#2A354B;
+  --accent:#FF5A6E; --accent-soft:#3A1D25; --navy:#9DB8EE; --navy-soft:#1D2A44;
+  --ok:#5FD39A; --ok-soft:#173A2A; --warn:#F2B35B; --warn-soft:#3A2C14; --off:#6B7489; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:680px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{margin:0;line-height:1.3;text-wrap:balance}
+p{margin:0}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{padding-block:10px 10px;display:grid;gap:8px}
+.brand{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.brand h1{font-size:17px;font-weight:700}
+.sync{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--navy-soft);color:var(--navy);white-space:nowrap;display:flex;align-items:center;gap:6px}
+.sync::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.sync.live{background:var(--ok-soft);color:var(--ok)}
+.sync.local{background:var(--warn-soft);color:var(--warn)}
+.cps{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-inline:-4px;padding-inline:4px}
+.cps::-webkit-scrollbar{display:none}
+.cp{flex:none;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:6px 10px;cursor:pointer;display:grid;gap:0;text-align:left;min-width:92px}
+.cp .l{font-size:13px;font-weight:700}
+.cp .s{font-size:11.5px;color:var(--muted)}
+.cp .c{font-family:var(--f-mono);font-size:12px;font-weight:600;color:var(--muted)}
+.cp[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:var(--surface)}
+.cp[aria-pressed="true"] .s,.cp[aria-pressed="true"] .c{color:var(--surface);opacity:.85}
+.cp.full .c{color:var(--ok)}
+.cp.full[aria-pressed="true"] .c{color:var(--surface)}
+
+main .wrap{padding-block:16px 40px;display:grid;gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;min-width:0}
+.banner{font-size:13px;border-radius:10px;padding:9px 12px;font-weight:600}
+.banner.local{background:var(--warn-soft);color:var(--warn)}
+.banner.ro{background:var(--accent-soft);color:var(--accent)}
+
+.tally{display:grid;gap:12px}
+.tally-head{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.tally-head .t{font-size:13px;color:var(--muted);font-weight:600}
+.tally-head .name{font-size:18px;font-weight:700}
+.big{font-family:var(--f-mono);font-weight:600;font-size:34px;line-height:1;letter-spacing:-.02em}
+.big small{font-size:16px;color:var(--muted);font-weight:500}
+.big.done{color:var(--ok)}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:44px 1fr 64px;gap:10px;align-items:center;font-size:13.5px}
+.bar .lb{font-weight:600}
+.bar .tr{height:8px;border-radius:99px;background:var(--navy-soft);overflow:hidden}
+.bar .fl{height:100%;background:var(--navy);border-radius:99px;transition:width .3s}
+.bar.full .fl{background:var(--ok)}
+.bar .n{font-family:var(--f-mono);font-size:12.5px;text-align:right;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.bar .fl{transition:none}}
+.missing{font-size:13.5px;display:grid;gap:6px}
+.missing .who{color:var(--accent);font-weight:600}
+.row-btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font-size:13.5px;font-weight:700;border-radius:9px;padding:8px 12px;border:1px solid var(--navy);background:var(--navy);color:var(--surface);cursor:pointer}
+.btn.ghost{background:none;color:var(--navy)}
+.btn.sm{padding:5px 10px;font-size:12.5px}
+
+.filters{display:grid;gap:8px}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{border:0;background:none;color:var(--muted);font-weight:600;font-size:14px;padding:7px 4px;border-radius:8px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--navy);color:var(--surface)}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;cursor:pointer;justify-self:start}
+.toggle input{width:18px;height:18px;accent-color:var(--navy);margin:0}
+
+.branch{display:grid;gap:8px}
+.branch-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:4px 2px 0}
+.branch-h h2{font-size:17px}
+.branch-h .lead{font-size:12.5px;color:var(--muted)}
+.leaders{display:grid;gap:6px}
+.leader{display:grid;grid-template-columns:1fr minmax(0,150px) auto;gap:8px;align-items:center;font-size:14px;background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:8px 10px}
+.leader b{font-weight:700}
+.leader .role{color:var(--muted);font-size:12.5px;margin-left:4px}
+.noleader{font-size:13px;background:var(--accent-soft);color:var(--accent);border-radius:10px;padding:8px 10px;font-weight:600}
+
+.p{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.p.absent{opacity:.6}
+.p-main{display:grid;grid-template-columns:52px 1fr auto;align-items:center;min-height:62px}
+.chk{height:100%;min-height:62px;border:0;border-right:1px solid var(--line);background:none;cursor:pointer;display:grid;place-items:center}
+.chk .box{width:28px;height:28px;border-radius:8px;border:2px solid var(--off);display:grid;place-items:center;transition:background .15s}
+.chk[aria-pressed="true"] .box{background:var(--ok);border-color:var(--ok)}
+.chk[aria-pressed="true"] .box::after{content:"";width:9px;height:15px;border:solid var(--surface);border-width:0 3px 3px 0;transform:translateY(-2px) rotate(45deg)}
+.chk:disabled{cursor:default}
+.chk:disabled .box{border-style:dashed}
+.who-btn{border:0;background:none;text-align:left;padding:8px 12px;cursor:pointer;min-width:0;display:grid;gap:2px}
+.who-btn .nm{font-weight:700;font-size:16px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.who-btn .cls{font-size:12px;font-weight:600;color:var(--muted)}
+.who-btn .meta{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.tagx{font-size:11px;font-weight:700;padding:1px 6px;border-radius:6px}
+.tagx.add{background:var(--navy-soft);color:var(--navy)}
+.tagx.warn{background:var(--warn-soft);color:var(--warn)}
+.tagx.abs{background:var(--accent-soft);color:var(--accent)}
+.when{font-family:var(--f-mono);font-size:12px;color:var(--ok);padding-right:12px;text-align:right;white-space:nowrap}
+.dots{display:flex;gap:3px;padding-right:12px;justify-content:flex-end}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--ok)}
+.side{display:grid;gap:4px;justify-items:end}
+.p-more{border-top:1px solid var(--line);padding:12px;display:grid;gap:10px;background:var(--bg)}
+.fld{display:grid;gap:4px}
+.fld label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.fld .in{display:grid;grid-template-columns:1fr auto;gap:6px}
+.fld .in3{grid-template-columns:minmax(84px,104px) 1fr auto}
+select{width:100%;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:9px 8px;font-size:15px;min-width:0}
+input[type="tel"],input[type="text"],textarea{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:9px 10px;font-size:15px;min-width:0}
+input[type="tel"]{font-family:var(--f-mono)}
+textarea{min-height:60px;resize:vertical;font-size:14px}
+.cpgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+.cpgrid label{display:flex;gap:6px;align-items:center;font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 8px;cursor:pointer}
+.cpgrid input{width:16px;height:16px;margin:0;accent-color:var(--ok)}
+.cpgrid .tm{margin-left:auto;font-family:var(--f-mono);font-size:11px;color:var(--ok)}
+.abs-row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px}
+.info{font-size:12.5px;color:var(--muted);display:grid;gap:2px}
+
+.matrix-wrap{overflow-x:auto}
+table.mx{border-collapse:collapse;width:100%;min-width:520px;font-size:13px}
+.mx th,.mx td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:center;white-space:nowrap}
+.mx th{font-size:12px;color:var(--muted);font-weight:600}
+.mx td:first-child,.mx th:first-child{text-align:left;font-weight:700}
+.mx td{font-family:var(--f-mono)}
+.mx td.full{color:var(--ok);font-weight:600}
+details.fold > summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between}
+details.fold > summary::-webkit-details-marker{display:none}
+details.fold > summary::after{content:"+";font-family:var(--f-mono);color:var(--muted)}
+details.fold[open] > summary::after{content:"−"}
+details.fold[open] > summary{margin-bottom:10px}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:13.5px;font-weight:600;padding:9px 14px;border-radius:10px;z-index:20;max-width:calc(100% - 32px)}
+footer{font-size:12px;color:var(--muted);display:grid;gap:4px}
+</style>
+</head>
+<body>
+
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><h1>SKT 견학 인원 체크 <span class="mono" style="font-size:12.5px;color:var(--muted);font-weight:500">11.07(토)</span></h1><span class="sync" id="sync">연결 중</span></div>
+    <div class="cps" id="cps" role="group" aria-label="체크포인트 선택"></div>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+  <p class="banner local" id="bnLocal" hidden>이 휴대폰에만 저장됩니다. 다른 인솔자와 체크 현황이 공유되지 않습니다.</p>
+  <p class="banner ro" id="bnRo" hidden>보기 전용입니다. 체크와 연락처 입력은 편집 권한이 있는 인솔자만 할 수 있습니다.</p>
+
+  <section class="card tally" aria-live="polite">
+    <div class="tally-head">
+      <div><p class="t" id="tCpTime"></p><p class="name" id="tCpName"></p></div>
+      <p class="big" id="tBig"></p>
+    </div>
+    <div class="bars" id="bars"></div>
+    <div class="missing" id="missing"></div>
+    <div class="row-btns">
+      <button type="button" class="btn ghost sm" id="copyMissing">미확인 명단 복사</button>
+      <button type="button" class="btn ghost sm" id="copyContacts">비상 연락망 복사</button>
+    </div>
+  </section>
+
+  <section class="filters" aria-label="보기 설정">
+    <div class="seg" id="brSeg" role="group" aria-label="지점">
+      <button type="button" data-b="all" aria-pressed="true">전체</button>
+      <button type="button" data-b="dj" aria-pressed="false">대전</button>
+      <button type="button" data-b="dg" aria-pressed="false">대구</button>
+      <button type="button" data-b="bs" aria-pressed="false">부산</button>
+    </div>
+    <label class="toggle"><input type="checkbox" id="onlyMissing"> 미확인 인원만 보기</label>
+  </section>
+
+  <div id="list" style="display:grid;gap:22px"></div>
+
+  <details class="card fold">
+    <summary>전체 체크포인트 현황표</summary>
+    <div class="matrix-wrap"><table class="mx" id="matrix"></table></div>
+  </details>
+
+  <footer>
+    <p>체크 버튼을 누르면 확인 시각이 함께 기록됩니다. 이름을 누르면 연락처·불참·메모를 입력할 수 있습니다.</p>
+    <p>인원 수는 불참 처리된 인원을 빼고 셉니다.</p>
+    <p>K-뉴딜 SKT ALEPH · 코리아AI아카데미</p>
+  </footer>
+</div>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+var CPS=[
+ {id:"dep",  l:"출발",      s:"지점 출발·탑승", at:0},
+ {id:"seoul",l:"서울역 집결",s:"10:30",         at:600},
+ {id:"entry",l:"소월타워 입장",s:"11:10",       at:650},
+ {id:"regroup",l:"재집결",  s:"14:40 신세계",   at:820},
+ {id:"review",l:"발표 참석", s:"SKT 타워",      at:880},
+ {id:"leave",l:"귀가 출발", s:"16:40~",        at:960},
+ {id:"home", l:"귀가 완료", s:"도착 연락",      at:1020}
+];
+var BR={dj:{n:"대전",leads:[{id:"L-dj1",nm:"박종천",rk:"멘토"}]},dg:{n:"대구",leads:[{id:"L-dg1",nm:"옥희종",rk:"부원장 · 총괄"},{id:"L-dg2",nm:"최채은",rk:"주임"}]},bs:{n:"부산",leads:[]}};
+function P(id,b,c,nm,rel,tk,info,flag){return {id:id,b:b,c:c,nm:nm,rel:rel,tk:tk,info:info,flag:flag||""}}
+var PEOPLE=[
+ P("dj01","dj","A","한승윤","모","개별","09:58 서울역 도착"),
+ P("dj02","dj","A","함찬원","모","개별","08:47 서울역 도착"),
+ P("dj03","dj","A","이정원","부","개별","09:52 서울역 도착"),
+ P("dj04","dj","A","조원웅","부","개별","11/6(금) 20:21 도착 · 전날 상경"),
+ P("dj05","dj","A","강혜성","부","개별","09:52 서울역 도착"),
+ P("dj06","dj","A","김경민","애인","개별","09:52 서울역 도착 · 예비 대체"),
+ P("dj07","dj","B","이예은","자매","개별","09:25 서울역 도착"),
+ P("dj08","dj","B","오하율","-","개별","09:35 서울역 도착"),
+ P("dj09","dj","B","이은지","모","개별","10:00 도착 · 용인 광역버스 (교통비 지급 X)","warn"),
+ P("dj10","dj","B","김재이","친구","개별","09:35 서울역 도착 · 예비 추가"),
+ P("dg01","dg","A","이영규","모","단체","단체 예매"),
+ P("dg02","dg","A","배주형","모","단체","단체 예매"),
+ P("dg03","dg","A","장아름","친구","개별","귀가편(서울→동대구) 개별 발급"),
+ P("dg04","dg","A","홍지민","모","개별","귀가편(서울→동대구) 개별 발급"),
+ P("dg05","dg","A","김가은","모","개별","귀가편(서울→동대구) 개별 발급"),
+ P("dg06","dg","A","전지은","모","개별","귀가편(서울→동대구) 개별 발급"),
+ P("dg07","dg","B","변준혁","모","단체","단체 예매"),
+ P("dg08","dg","B","신영한","모","단체","단체 예매"),
+ P("dg09","dg","B","하태형","모","단체","단체 예매"),
+ P("dg10","dg","B","김건호","친구","단체","단체 예매"),
+ P("bs01","bs","A","이학산","모","개별","예매 완료"),
+ P("bs02","bs","A","김준오","모","개별","예매 완료"),
+ P("bs03","bs","A","심희현","모","개별","예매 완료"),
+ P("bs04","bs","A","홍주형","본인","개별","상행 완료 · 하행 예매 전","warn"),
+ P("bs05","bs","A","김명준","형","개별","예매 완료"),
+ P("bs06","bs","A","강아름","부","개별","예매 완료"),
+ P("bs07","bs","A","문경구","모","개별","예매 완료"),
+ P("bs08","bs","B","김다영","모","개별","예매 완료"),
+ P("bs09","bs","B","박선민","모","개별","예매 완료"),
+ P("bs10","bs","B","김민승","모","개별","예매 완료"),
+ P("bs11","bs","B","조경익","모","개별","예매 완료"),
+ P("bs12","bs","A","서효상","모","개별","추가 선정","add"),
+ P("bs13","bs","B","염영진","모","개별","추가 선정","add")
+];
+var LEADERS=[];Object.keys(BR).forEach(function(k){BR[k].leads.forEach(function(l){LEADERS.push(l)})});
+
+/* ---------- state ---------- */
+var S={}; // id -> {phone,ephone,absent,memo,cp:{}}
+var mode="connecting", readOnly=false, db=null;
+var ui={cp:null,br:"all",only:false,open:{}};
+function blank(){return {phone:"",ephone:"",rel:"",absent:false,memo:"",cp:{}}}
+var RELS=["부","모","형","오빠","누나","언니","형제","자매","배우자","애인","친구","본인","기타"];
+function relOf(p){var s=get(p.id);return s.rel||(RELS.indexOf(p.rel)>=0?p.rel:"")}
+function get(id){return S[id]||blank()}
+var LS="skt-roll-1107";
+function lsLoad(){try{var j=JSON.parse(localStorage.getItem(LS)||"{}");return j&&typeof j==="object"?j:{}}catch(e){return {}}}
+function lsSave(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
+try{ui.br=localStorage.getItem(LS+"-br")||"all"}catch(e){}
+
+function kstNow(){var n=new Date(Date.now()+9*3600e3);return {d:n.getUTCFullYear()*10000+(n.getUTCMonth()+1)*100+n.getUTCDate(),m:n.getUTCHours()*60+n.getUTCMinutes(),hm:("0"+n.getUTCHours()).slice(-2)+":"+("0"+n.getUTCMinutes()).slice(-2)}}
+function autoCp(){var k=kstNow();if(k.d!==20261107)return "dep";var pick="dep";CPS.forEach(function(c){if(k.m>=c.at)pick=c.id});return pick}
+ui.cp=autoCp();
+
+/* ---------- writes ---------- */
+var pending={},writing={},timers={};
+function schedule(id,delay){clearTimeout(timers[id]);timers[id]=setTimeout(function(){flush(id)},delay||0)}
+function flush(id){
+  timers[id]=null;
+  if(mode==="local"){lsSave();return}
+  if(!db||readOnly)return;
+  if(writing[id]){pending[id]=true;return}
+  writing[id]=true;pending[id]=false;
+  var path=id.indexOf("L-")===0?"leaders/"+id:"roster/"+id;
+  var body=JSON.parse(JSON.stringify(get(id)));
+  db.doc(path).set(body).then(function(){writing[id]=false;if(pending[id])flush(id)},function(e){
+    writing[id]=false;
+    if(e&&e.code==="invalid_argument"){setRO(true);toast("편집 권한이 없어 저장하지 못했습니다.")}
+    else if(e&&e.code==="unavailable"){setTimeout(function(){flush(id)},800+Math.random()*800)}
+    else toast("저장하지 못했습니다. 잠시 후 다시 눌러 주세요.");
+  });
+}
+function mutate(id,fn,delay){var o=JSON.parse(JSON.stringify(get(id)));fn(o);S[id]=o;if(mode==="local")lsSave();else schedule(id,delay);refresh()}
+
+/* ---------- helpers ---------- */
+function fmtPhone(v){var d=(v||"").replace(/\D/g,"");if(d.length===11)return d.slice(0,3)+"-"+d.slice(3,7)+"-"+d.slice(7);if(d.length===10)return d.slice(0,3)+"-"+d.slice(3,6)+"-"+d.slice(6);return v.trim()}
+function el(t,a,kids){var e=document.createElement(t);if(a)for(var k in a){if(k==="text")e.textContent=a[k];else if(k==="cls")e.className=a[k];else e.setAttribute(k,a[k])}(kids||[]).forEach(function(c){if(c)e.appendChild(typeof c==="string"?document.createTextNode(c):c)});return e}
+function cpOf(id){return CPS.filter(function(c){return c.id===id})[0]}
+function copy(text,msg){
+  function ok(){toast(msg||"복사했습니다.")}
+  function fail(){var ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");ok()}catch(e){toast("복사하지 못했습니다.")}ta.remove()}
+  try{navigator.clipboard.writeText(text).then(ok,fail)}catch(e){fail()}
+}
+var tt;function toast(m){var t=document.getElementById("toast");t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(function(){t.hidden=true},2200)}
+function counts(cp,br){var tot=0,ok=0,miss=[];PEOPLE.forEach(function(p){if(br&&p.b!==br)return;var s=get(p.id);if(s.absent)return;tot++;if(s.cp[cp])ok++;else miss.push(p)});return {tot:tot,ok:ok,miss:miss}}
+
+/* ---------- build ---------- */
+var cpBtns={},rows={};
+function buildCps(){var box=document.getElementById("cps");CPS.forEach(function(c){
+  var b=el("button",{type:"button",cls:"cp","aria-pressed":"false"},[el("span",{cls:"l",text:c.l}),el("span",{cls:"s",text:c.s}),el("span",{cls:"c"})]);
+  b.addEventListener("click",function(){ui.cp=c.id;refresh()});box.appendChild(b);cpBtns[c.id]=b})}
+function buildList(){
+  var list=document.getElementById("list");
+  ["dj","dg","bs"].forEach(function(bk){
+    var sec=el("section",{cls:"branch","data-br":bk});
+    var cnt=el("span",{cls:"lead mono"});
+    sec.appendChild(el("div",{cls:"branch-h"},[el("h2",{text:BR[bk].n+"지점"}),cnt]));sec._cnt=cnt;
+    var ld=el("div",{cls:"leaders"});
+    if(!BR[bk].leads.length)ld.appendChild(el("p",{cls:"noleader",text:"인솔자 없음 · 부산 훈련생은 총 책임자가 직접 확인"}));
+    BR[bk].leads.forEach(function(l){
+      var inp=el("input",{type:"tel",id:"ph-"+l.id,placeholder:"010-0000-0000",inputmode:"tel","aria-label":l.nm+" 연락처",autocomplete:"off"});
+      inp.addEventListener("input",function(){mutate(l.id,function(o){o.phone=inp.value},700)});
+      inp.addEventListener("blur",function(){var f=fmtPhone(inp.value);if(f!==inp.value){inp.value=f;mutate(l.id,function(o){o.phone=f},0)}});
+      var cb=el("button",{type:"button",cls:"btn ghost sm",text:"복사"});cb.addEventListener("click",function(){if(inp.value)copy(inp.value,l.nm+" 번호를 복사했습니다.");else inp.focus()});
+      ld.appendChild(el("div",{cls:"leader"},[el("span",null,[el("b",{text:l.nm}),el("span",{cls:"role",text:"인솔 · "+l.rk})]),inp,cb]));
+      rows[l.id]={phone:inp};
+    });
+    sec.appendChild(ld);
+    PEOPLE.filter(function(p){return p.b===bk}).forEach(function(p){sec.appendChild(buildRow(p))});
+    list.appendChild(sec);BR[bk].sec=sec;
+  });
+}
+function buildRow(p){
+  var card=el("article",{cls:"p"});
+  var box=el("span",{cls:"box"});
+  var chk=el("button",{type:"button",cls:"chk","aria-pressed":"false","aria-label":p.nm+" 확인"},[box]);
+  chk.addEventListener("click",function(){if(readOnly)return;var cp=ui.cp;mutate(p.id,function(o){if(o.cp[cp])delete o.cp[cp];else o.cp[cp]=kstNow().hm},0)});
+  var tags=el("span");
+  var nm=el("span",{cls:"nm"},[p.nm,el("span",{cls:"cls",text:p.c+"반"}),tags]);
+  var meta=el("span",{cls:"meta",text:p.tk+" · "+p.info});
+  var who=el("button",{type:"button",cls:"who-btn","aria-expanded":"false"},[nm,meta]);
+  var when=el("span",{cls:"when"});var dots=el("span",{cls:"dots","aria-hidden":"true"});
+  CPS.forEach(function(){dots.appendChild(el("i"))});
+  var side=el("div",{cls:"side"},[when,dots]);
+  card.appendChild(el("div",{cls:"p-main"},[chk,who,side]));
+  // more
+  var more=el("div",{cls:"p-more",hidden:""});
+  function phoneField(key,label,ph){
+    var inp=el("input",{type:"tel",id:key+"-"+p.id,placeholder:ph,inputmode:"tel",autocomplete:"off"});
+    inp.addEventListener("input",function(){mutate(p.id,function(o){o[key]=inp.value},700)});
+    inp.addEventListener("blur",function(){var f=fmtPhone(inp.value);if(f!==inp.value){inp.value=f;mutate(p.id,function(o){o[key]=f},0)}});
+    var cb=el("button",{type:"button",cls:"btn ghost sm",text:"복사"});cb.addEventListener("click",function(){if(inp.value)copy(inp.value);else inp.focus()});
+    more.appendChild(el("div",{cls:"fld"},[el("label",{for:key+"-"+p.id,text:label}),el("div",{cls:"in"},[inp,cb])]));return inp}
+  var ph=phoneField("phone","본인 연락처","010-0000-0000");
+  var rel=el("select",{id:"rel-"+p.id,"aria-label":p.nm+" 비상 연락처 관계"},[el("option",{value:"",text:"관계 선택"})]);
+  RELS.forEach(function(r){rel.appendChild(el("option",{value:r,text:r}))});
+  rel.addEventListener("change",function(){mutate(p.id,function(o){o.rel=rel.value},0)});
+  var eph=el("input",{type:"tel",id:"ephone-"+p.id,placeholder:"010-0000-0000",inputmode:"tel",autocomplete:"off"});
+  eph.addEventListener("input",function(){mutate(p.id,function(o){o.ephone=eph.value},700)});
+  eph.addEventListener("blur",function(){var f=fmtPhone(eph.value);if(f!==eph.value){eph.value=f;mutate(p.id,function(o){o.ephone=f},0)}});
+  var ecb=el("button",{type:"button",cls:"btn ghost sm",text:"복사"});ecb.addEventListener("click",function(){if(eph.value)copy(eph.value);else eph.focus()});
+  more.appendChild(el("div",{cls:"fld"},[el("label",{for:"ephone-"+p.id,text:"비상 연락처"}),el("div",{cls:"in in3"},[rel,eph,ecb])]));
+  var grid=el("div",{cls:"cpgrid"});var cpIn={};
+  CPS.forEach(function(c){var i=el("input",{type:"checkbox",id:"cp-"+p.id+"-"+c.id});var tm=el("span",{cls:"tm"});
+    i.addEventListener("change",function(){if(readOnly){i.checked=!i.checked;return}mutate(p.id,function(o){if(i.checked)o.cp[c.id]=kstNow().hm;else delete o.cp[c.id]},0)});
+    grid.appendChild(el("label",{for:"cp-"+p.id+"-"+c.id},[i,c.l,tm]));cpIn[c.id]={i:i,tm:tm}});
+  more.appendChild(el("div",{cls:"fld"},[el("label",{text:"체크포인트"}),grid]));
+  var abs=el("button",{type:"button",cls:"btn ghost sm"});
+  abs.addEventListener("click",function(){if(readOnly)return;mutate(p.id,function(o){o.absent=!o.absent},0)});
+  more.appendChild(el("div",{cls:"abs-row"},[el("span",{text:"불참 처리하면 인원 수에서 빠집니다."}),abs]));
+  var memo=el("textarea",{id:"memo-"+p.id,placeholder:"예: 열차 지연으로 10:50 도착 예정"});
+  memo.addEventListener("input",function(){mutate(p.id,function(o){o.memo=memo.value},900)});
+  more.appendChild(el("div",{cls:"fld"},[el("label",{for:"memo-"+p.id,text:"메모"}),memo]));
+  more.appendChild(el("div",{cls:"info"},[el("span",{text:"승차권: "+p.tk+" · "+p.info})]));
+  card.appendChild(more);
+  who.addEventListener("click",function(){var o=more.hidden;more.hidden=!o;who.setAttribute("aria-expanded",o);ui.open[p.id]=o});
+  rows[p.id]={card:card,chk:chk,tags:tags,when:when,dots:dots,ph:ph,eph:eph,rel:rel,cpIn:cpIn,abs:abs,memo:memo};
+  return card;
+}
+
+/* ---------- refresh ---------- */
+function setVal(inp,v){if(document.activeElement!==inp&&inp.value!==(v||""))inp.value=v||""}
+function refresh(){
+  var cp=cpOf(ui.cp);
+  CPS.forEach(function(c){var k=counts(c.id);var b=cpBtns[c.id];b.setAttribute("aria-pressed",c.id===ui.cp);b.querySelector(".c").textContent=k.ok+"/"+k.tot;b.classList.toggle("full",k.tot>0&&k.ok===k.tot)});
+  var all=counts(cp.id);
+  document.getElementById("tCpTime").textContent=cp.s;
+  document.getElementById("tCpName").textContent=cp.l+" 확인";
+  var big=document.getElementById("tBig");big.innerHTML="";big.appendChild(document.createTextNode(all.ok));big.appendChild(el("small",{text:" / "+all.tot+"명"}));big.classList.toggle("done",all.tot>0&&all.ok===all.tot);
+  var bars=document.getElementById("bars");bars.innerHTML="";
+  ["dj","dg","bs"].forEach(function(bk){var k=counts(cp.id,bk);var pct=k.tot?Math.round(k.ok/k.tot*100):0;
+    var fl=el("div",{cls:"fl"});fl.style.width=pct+"%";
+    var r=el("div",{cls:"bar"+(k.tot&&k.ok===k.tot?" full":"")},[el("span",{cls:"lb",text:BR[bk].n}),el("div",{cls:"tr"},[fl]),el("span",{cls:"n",text:k.ok+" / "+k.tot})]);bars.appendChild(r)});
+  var ms=document.getElementById("missing");ms.innerHTML="";
+  if(all.miss.length===0&&all.tot>0)ms.appendChild(el("p",{text:"전원 확인되었습니다.",style:"color:var(--ok);font-weight:700"}));
+  else if(all.miss.length){["dj","dg","bs"].forEach(function(bk){var m=all.miss.filter(function(p){return p.b===bk});if(!m.length)return;
+    ms.appendChild(el("p",null,[el("b",{text:BR[bk].n+" 미확인 "+m.length+"명 "}),el("span",{cls:"who",text:m.map(function(p){return p.nm}).join(", ")})]))})}
+  // branch filter
+  document.querySelectorAll("#brSeg button").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.b===ui.br)});
+  ["dj","dg","bs"].forEach(function(bk){var sec=BR[bk].sec;sec.hidden=!(ui.br==="all"||ui.br===bk);var k=counts(cp.id,bk);sec._cnt.textContent=cp.l+" "+k.ok+"/"+k.tot});
+  PEOPLE.forEach(function(p){var r=rows[p.id],s=get(p.id),t=s.cp[cp.id];
+    r.card.classList.toggle("absent",!!s.absent);
+    r.chk.setAttribute("aria-pressed",!!t);r.chk.disabled=readOnly||!!s.absent;
+    r.when.textContent=s.absent?"":(t?t+" 확인":"");
+    r.tags.innerHTML="";
+    if(s.absent)r.tags.appendChild(el("span",{cls:"tagx abs",text:"불참"}));
+    if(p.flag==="add")r.tags.appendChild(el("span",{cls:"tagx add",text:"추가"}));
+    if(p.flag==="warn")r.tags.appendChild(el("span",{cls:"tagx warn",text:"확인 필요"}));
+    if(!s.phone)r.tags.appendChild(el("span",{cls:"tagx warn",text:"연락처 미입력"}));
+    [].forEach.call(r.dots.children,function(d,i){d.classList.toggle("on",!!s.cp[CPS[i].id])});
+    setVal(r.ph,s.phone);setVal(r.eph,s.ephone);setVal(r.memo,s.memo);var rv=relOf(p);if(document.activeElement!==r.rel&&r.rel.value!==rv)r.rel.value=rv;r.rel.disabled=readOnly;
+    CPS.forEach(function(c){var x=r.cpIn[c.id];x.i.checked=!!s.cp[c.id];x.i.disabled=readOnly||!!s.absent;x.tm.textContent=s.cp[c.id]||""});
+    r.abs.textContent=s.absent?"참여로 되돌리기":"불참 처리";r.abs.disabled=readOnly;
+    [r.ph,r.eph,r.memo].forEach(function(i){i.readOnly=readOnly});
+    r.card.hidden=ui.only&&(!!t||!!s.absent);
+  });
+  LEADERS.forEach(function(l){var r=rows[l.id];if(r){setVal(r.phone,get(l.id).phone);r.phone.readOnly=readOnly}});
+  // matrix
+  var mx=document.getElementById("matrix");mx.innerHTML="";
+  var hr=el("tr",null,[el("th",{text:"지점"})]);CPS.forEach(function(c){hr.appendChild(el("th",{text:c.l}))});mx.appendChild(el("thead",null,[hr]));
+  var tb=el("tbody");[["dj"],["dg"],["bs"],[null]].forEach(function(a){var bk=a[0];var tr=el("tr",null,[el("td",{text:bk?BR[bk].n:"합계"})]);
+    CPS.forEach(function(c){var k=counts(c.id,bk||undefined);tr.appendChild(el("td",{cls:k.tot&&k.ok===k.tot?"full":"",text:k.ok+"/"+k.tot}))});tb.appendChild(tr)});mx.appendChild(tb);
+}
+
+/* ---------- mode ---------- */
+function setRO(v){readOnly=v;document.getElementById("bnRo").hidden=!v;refresh()}
+function setMode(m){mode=m;var s=document.getElementById("sync");
+  s.className="sync"+(m==="live"?" live":m==="local"?" local":"");
+  s.textContent=m==="live"?"실시간 공유":m==="local"?"이 기기에 저장":m==="stale"?"연결 지연":"연결 중";
+  document.getElementById("bnLocal").hidden=m!=="local"}
+
+buildCps();buildList();
+document.querySelectorAll("#brSeg button").forEach(function(b){b.addEventListener("click",function(){ui.br=b.dataset.b;try{localStorage.setItem(LS+"-br",ui.br)}catch(e){}refresh()})});
+document.getElementById("onlyMissing").addEventListener("change",function(e){ui.only=e.target.checked;refresh()});
+document.getElementById("copyMissing").addEventListener("click",function(){var cp=cpOf(ui.cp),a=counts(cp.id);
+  var lines=["[SKT 견학] "+cp.l+" 확인 "+a.ok+"/"+a.tot+"명 ("+kstNow().hm+" 기준)"];
+  ["dj","dg","bs"].forEach(function(bk){var m=a.miss.filter(function(p){return p.b===bk});if(m.length)lines.push(BR[bk].n+" 미확인: "+m.map(function(p){return p.nm}).join(", "))});
+  if(!a.miss.length)lines.push("전원 확인");copy(lines.join("\n"),"미확인 명단을 복사했습니다.")});
+document.getElementById("copyContacts").addEventListener("click",function(){
+  var lines=["[SKT 견학 비상 연락망]"];
+  ["dj","dg","bs"].forEach(function(bk){lines.push("");lines.push("■ "+BR[bk].n+"지점");
+    BR[bk].leads.forEach(function(l){lines.push("인솔 "+l.nm+" "+(get(l.id).phone||"(미입력)"))});
+    PEOPLE.filter(function(p){return p.b===bk}).forEach(function(p){var s=get(p.id);lines.push(p.nm+"("+p.c+") "+(s.phone||"미입력")+" / 비상("+(relOf(p)||"관계 미선택")+") "+(s.ephone||"미입력")+(s.absent?" [불참]":""))})});
+  copy(lines.join("\n"),"비상 연락망을 복사했습니다.")});
+
+// render immediately from local copy, then try shared store
+S=lsLoad();refresh();
+function goLocal(){if(mode==="live")return;setMode("local");S=Object.keys(S).length?S:lsLoad();refresh()}
+var cl=window.claude;
+if(!cl||!cl.use){goLocal()}else{
+  var giveUp=setTimeout(goLocal,10000);
+  cl.use("db").then(function(d){
+    if(!d){clearTimeout(giveUp);goLocal();return}
+    db=d;clearTimeout(giveUp);
+    var got={roster:false,leaders:false};var stale=setTimeout(function(){if(mode!=="live")setMode("stale")},10000);
+    function onSnap(kind){return function(snap){
+      var next={};Object.keys(S).forEach(function(k){if((kind==="leaders")!==(k.indexOf("L-")===0))next[k]=S[k]});
+      snap.docs.forEach(function(doc){var v=doc.data();if(v)next[doc.id]={phone:v.phone||"",ephone:v.ephone||"",rel:v.rel||"",absent:!!v.absent,memo:v.memo||"",cp:v.cp&&typeof v.cp==="object"?Object.assign({},v.cp):{}}});
+      var keep={};Object.keys(S).forEach(function(k){if(timers[k]||writing[k]||pending[k])keep[k]=S[k]});
+      S=next;Object.keys(keep).forEach(function(k){S[k]=keep[k]});
+      if(!snap.metadata.fromCache){got[kind]=true;if(got.roster&&got.leaders){clearTimeout(stale);setMode("live")}}
+      refresh();
+    }}
+    function onErr(e){clearTimeout(stale);if(e&&e.code==="revoked"){setRO(true)}setMode("stale");toast("공유 저장소에 연결하지 못했습니다.")}
+    db.collection("roster").onSnapshot(onSnap("roster"),onErr);
+    db.collection("leaders").onSnapshot(onSnap("leaders"),onErr);
+    cl.use("user").then(function(u){if(!u)return;try{var c=u.can("data.write");if(c&&typeof c.then==="function")c.then(function(v){if(v===false)setRO(true)});else if(c===false)setRO(true)}catch(e){}});
+  },function(){clearTimeout(giveUp);goLocal()});
+}
+})();
+</script>
+
+</body>
+</html>
